@@ -23,4 +23,29 @@
         </div>
     </div>
 
+
+    <form method="post" action="{{route('comments.store',$post->id)}}">
+        @csrf
+        <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">Comment</label>
+            <textarea name="comment" class="form-control" id="exampleFormControlTextarea1" cols="6" rows="3"></textarea>
+            <button class="btn btn-success">Comment</button>
+        </div>
+    </form>
+
+    <div>
+        @foreach($comments as $comment)
+        <div class="card mt-6">
+            <div class="card-body">
+                <p class="card-text">{{$comment->comment}}</p>
+                <span class="card-text">{{$comment->created_at}}</span>
+
+            </div>
+
+        </div><br>
+        @endforeach
+    </div>
+
+
+
 @endsection
