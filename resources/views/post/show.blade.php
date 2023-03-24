@@ -10,6 +10,10 @@
         <div class="card-body">
             <h5 class="card-title">Title: {{$post['title']}}</h5>
             <p class="card-text">Description: {{$post['description']}}</p>
+
+            @if($post->image !=null)
+            <img src="{{'/'.'storage/'.$post->image}}" width="250" alt=""/>
+            @endif
         </div>
     </div>
 
@@ -39,6 +43,12 @@
             <div class="card-body">
                 <p class="card-text">{{$comment->comment}}</p>
                 <span class="card-text">{{$comment->created_at}}</span>
+                <form class="ms-5" style="display:inline" method="post" action="{{route('comments.destroy',$comment->id)}}"
+                onclick="return confirm('Are you sure you want to delete this comment?')">
+                @method('DELETE')
+                @csrf
+                <button class="btn btn-danger">Delete</button>
+            </form>
 
             </div>
 

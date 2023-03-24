@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Post;
-use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostName;
+use Illuminate\Support\Facades\Storage;
+
 
 use function PHPSTORM_META\type;
 
@@ -36,7 +39,7 @@ class PostController extends Controller
         return view('post.create',['users'=>$users]);
     }
 
-    public function store(Request $request){
+    public function store(StorePostRequest $request){
         // type 1
         // $data=request()->all();
         // dd($data);
@@ -50,6 +53,32 @@ class PostController extends Controller
         // type 3
        // $data=$request->all();
         // dd($data);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = $image->getClientOriginalName();
+            $path = Storage::disk("public")->putFileAs('posts', $image, $filename);
+
+             Post::create([
+
+                'title' => $title,
+                'description' => $description,
+                'user_id' => $post_creator,
+                'image'=>$path
+    
+            ]);
+
+              }else{
+    Post::create([
+
+        'title' => $title,
+        'description' => $description,
+        'user_id' => $post_creator,
+
+    ]);
+}
+
+
         //insert the form data in database
         Post::create([
             'title' => $title ,
@@ -72,19 +101,37 @@ class PostController extends Controller
        
     }
 
-     public function update(Request $request, $postId){
+     public function update(UpdatePostName $request, $postId){
         $users = User::all();
         $post = Post::find($postId);
-        $post->update([
-            'title' => $request['title'],
-            'description' => $request['description'],
-             'user_id' => $request['post_creator'],
-        ]);
+        // $post->update([
+        //     'title' => $request['title'],
+        //     'description' => $request['description'],
+        //      'user_id' => $request['post_creator'],
+        // ]);
 
-        return view('post.show', [
-            'post' => $post,
-            'users' => $users,
-        ]);
+                $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        $post->user_id = $request->input('post_creator');
+        if ($request->hasFile('image')) {
+            if ($post->image) {
+                Storage::disk("public")->delete($post->image);
+            }
+                $image = $request->file('image');
+                $filename = $image->getClientOriginalName();
+                $path = Storage::disk("public")->putFileAs('posts', $image, $filename);
+                $post->image = $path;
+                
+        }
+
+        $post->save();
+
+        return redirect()->route("posts.index");
+
+        // return view('post.show', [
+        //     'post' => $post,
+        //     'users' => $users,
+        // ]);
      }
 
      public function delete($postId)
