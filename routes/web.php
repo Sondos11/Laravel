@@ -85,22 +85,49 @@ Route::get('/auth/google/redirect', function () {
 });
 
 Route::get('/auth/google/callback', function () {
-try {
-        $userData = Socialite::driver('google')->user();
-        $user = User::where('google_id',$userData->id)->first();
-        if ($user) {
-            Auth::login($user);
-            return to_route('posts.index');
-            }
-            $user = new User();
-            $user->name = $userData->name;
-            $user->email = $userData->email;
-            $user->password = Hash::make(Str::random(24));
-            $user->save();
-            Auth::login($user);
-            return to_route('posts.index');
+// try {
+//         $userData = Socialite::driver('google')->user();
+//         $user = User::where('google_id',$userData->id)->first();
+//         if ($user) {
+//             Auth::login($user);
+//             return to_route('posts.index');
+//             }
+//             $user = new User();
+//             $user->name = $userData->name;
+//             $user->email = $userData->email;
+//             $user->password = Hash::make(Str::random(24));
+//             $user->save();
+//             Auth::login($user);
+//             return to_route('posts.index');
 
-             } catch (Exception $e) {
+//              } catch (Exception $e) {
+//             dd($e->getMessage());
+//         }
+ try {
+        
+            $user = Socialite::driver('google')->user();
+         
+            $finduser = User::where('google_id', $user->id)->first();
+         
+            if($finduser){
+         
+                Auth::login($finduser);
+        
+                return to_route('posts.index');
+         
+            }else{
+                $newUser = User::updateOrCreate(['email' => $user->email],[
+                        'name' => $user->name,
+                        'google_id'=> $user->id,
+                        'password' => encrypt('123456dummy')
+                    ]);
+         
+                Auth::login($newUser);
+        
+                return to_route('posts.index');
+            }
+        
+        } catch (Exception $e) {
             dd($e->getMessage());
         }
 });
