@@ -82,10 +82,9 @@ try {
 
 Route::get('/auth/google/redirect', function () {
     return Socialite::driver('google')->redirect();
-    dd("hello");
 });
 
-Route::get('/auth/google/redirect/callback', function () {
+Route::get('/auth/google/callback', function () {
 try {
         $userData = Socialite::driver('google')->user();
         $user = User::where('google_id',$userData->id)->first();
